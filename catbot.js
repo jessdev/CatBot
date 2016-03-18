@@ -1,4 +1,12 @@
-var bot = require("botkit");
+var Botkit = require("botkit");
+
+var controller = Botkit.slackbot({
+    debug: true,
+});
+
+var bot = controller.spawn({
+    token: 'xoxb-26876200608-6bw3bhhrdlBzelTms47UrpaE'
+}).startRTM();
 
 controller.hears(['hello','hi'],'direct_message,direct_mention,mention',function(bot, message) {
     theBotHeardThat(bot, message)

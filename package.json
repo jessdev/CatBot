@@ -21,5 +21,7 @@
   "homepage": "https://github.com/jessdev/CatBot#readme",
   "dependencies": {
     "botkit": "0.0.11"
+  },
+  "devDependencies": {
   }
 }
