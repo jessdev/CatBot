@@ -1,0 +1,27 @@
+{
+  "name": "catbot",
+  "version": "1.0.0",
+  "description": "this is catbot. meow",
+  "main": "catbot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jessdev/CatBot.git"
+  },
+  "keywords": [
+    "catbot"
+  ],
+  "author": "Jessica DeVriese",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jessdev/CatBot/issues"
+  },
+  "homepage": "https://github.com/jessdev/CatBot#readme",
+  "dependencies": {
+    "botkit": "0.0.11"
+  },
+  "devDependencies": {
+  }
+}
