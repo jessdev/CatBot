@@ -21,7 +21,7 @@ controller.hears(['hello','hi'],'direct_message,direct_mention,mention',function
     });
 });
 
-controller.hear(['good cat', 'good kitty', 'good catbot'], ['Ambient'], function(bot, message){
+controller.hears(['good cat', 'good kitty', 'good catbot'], ['ambient'], function(bot, message){
     theBotHeardThat(bot, message);
     
     controller.storage.users.get(message.user, function(err, user){
@@ -36,7 +36,7 @@ controller.hear(['good cat', 'good kitty', 'good catbot'], ['Ambient'], function
         });
     });
 });
-controller.hear(['bad cat', 'bad kitty', 'bad catbot'], ['Ambient'], function(bot, message){
+controller.hears(['bad cat', 'bad kitty', 'bad catbot'], ['ambient'], function(bot, message){
     theBotHeardThat(bot, message);
     
     controller.storage.users.get(message.user, function(err, user){
