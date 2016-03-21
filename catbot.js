@@ -1,4 +1,5 @@
 var Botkit = require("botkit");
+var database = require('datamodule');
 
 var controller = Botkit.slackbot({
     debug: true,
@@ -71,6 +72,7 @@ controller.hears(['call me (.*)'],['ambient'],function(bot, message) {
             };
         }
         user.name = name;
+        database.addUser(user.id, user.name, (user.friendly != undefined ? user.friendly : false));
         controller.storage.users.save(user,function(err, id) {
             //bot.reply(message,'Nya~');
         });
