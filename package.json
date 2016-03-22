@@ -2,7 +2,7 @@
   "name": "catbot",
   "version": "1.0.0",
   "description": "this is catbot. meow",
-  "main": "catbot.js",
+  "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -23,5 +23,10 @@
     "botkit": "0.0.11",
     "sqlite3": "^3.1.1"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-uglify": "^1.5.3",
+    "gulp-concat": "^2.6.0",
+    "gulp-jshint": "^2.0.0"
+  }
 }
