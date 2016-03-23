@@ -44,7 +44,7 @@ function addUser(id, name, friendly){
         var stmt = db.prepare("INSERT INTO tblUser VALUES (?, ?, ?)");
         stmt.run(id, name, friendly);
         stmt.finalize();
-        console.log('Added User: '+id);
+        //console.log('Added User: '+id);
     });
 }
 
@@ -59,10 +59,10 @@ function readUser(id, callback){
 
 function updateUser(id, name, friendly){
     var query = 'UPDATE tblUser SET NAME="'+name+'", FRIENDLY='+(friendly? 1: 0)+' where USERID="'+id+'"' ;
-    console.log(query);
+    //console.log(query);
     db.serialize(function(){
         db.run(query);
-        console.log('Update complete');
+        //console.log('Update complete');
     });
 }
 

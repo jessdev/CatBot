@@ -1,9 +1,9 @@
 var Botkit = require("botkit");
 var database = require('./datatable.js');
-
+var callback;
 
 var controller = Botkit.slackbot({
-    debug: true,
+    debug: false,
 });
 
 database.getAllUsers(function(users) {
@@ -17,11 +17,11 @@ database.getAllUsers(function(users) {
                 };
             }
             controller.storage.users.save(user,function(err, id) {
-                console.log(user);
+                //console.log(user);
             });
         });
     }
-    console.log(users);
+    //console.log(users);
 });
 
 var feeling = {
@@ -38,11 +38,12 @@ var bot = controller.spawn({
 }).startRTM();
 
 controller.hears(['hello','hi', 'hey'],'direct_message,direct_mention,mention',function(bot, message) {
+    callListen(bot, message)
     controller.storage.users.get(message.user,function(err, user) {
         if(!user){
             user = userinit(message.user, '?', false);
         }
-        console.log(user);
+        ///onsole.log(user);
         if (user && user.friendly) {
             theBotHeardThat(bot, message, feeling.happy);
             bot.reply(message,'meow..?');
@@ -54,6 +55,7 @@ controller.hears(['hello','hi', 'hey'],'direct_message,direct_mention,mention',f
 });
 
 controller.hears(['good cat', 'good kitty', 'good catbot'], ['ambient'], function(bot, message){
+    callListen(bot, message)
     theBotHeardThat(bot, message, feeling.love);
     
     controller.storage.users.get(message.user, function(err, user){
@@ -70,6 +72,7 @@ controller.hears(['good cat', 'good kitty', 'good catbot'], ['ambient'], functio
     });
 });
 controller.hears(['bad cat', 'bad kitty', 'bad catbot'], ['ambient'], function(bot, message){
+    callListen(bot, message)
     theBotHeardThat(bot, message, feeling.shocked);
     
     controller.storage.users.get(message.user, function(err, user){
@@ -89,6 +92,7 @@ controller.hears(['call me (.*)'],['ambient','direct_message','direct_mention','
     var matches = message.text.match(/call me (.*)/i);
     var name = matches[1];
     theBotHeardThat(bot, message, feeling.cat);
+    callListen(bot, message)
     controller.storage.users.get(message.user,function(err, user) {
         if(!user){
             user = userinit(message.user, name, false);
@@ -103,6 +107,7 @@ controller.hears(['call me (.*)'],['ambient','direct_message','direct_mention','
 });
 
 controller.hears(['report'], ['direct_message','direct_mention','mention'], function(bot, message){
+    callListen(bot, message)
     controller.storage.users.get(message.user,function(err, user) {
         if(user && user.name == 'jdev'){
             database.getAllUsers(function(users) {
@@ -116,7 +121,7 @@ controller.hears(['report'], ['direct_message','direct_mention','mention'], func
 });
 
 controller.hears(['uptime','identify yourself','who are you','what is your name'],'direct_message,direct_mention,mention',function(bot, message) {
-
+    callListen(bot, message)
     theBotHeardThat(bot, message, feeling.cat);
     var uptime = formatUptime(process.uptime());
     bot.reply(message,':cat2: Meow Meow Meow (I am a bot named <@' + bot.identity.name + '>. I have been running for ' + uptime + ')');
@@ -142,6 +147,7 @@ function formatUptime(uptime) {
 }
 
 function theBotHeardThat(bot, message, emoji){
+    callListen(bot, message)
     bot.api.reactions.add({
         timestamp: message.ts,
         channel: message.channel,
@@ -159,11 +165,19 @@ function userinit(userid, name, friendly){
         name: name,
         friendly: friendly 
     };
-    console.log(user);
+    //console.log(user);
     database.addUser(userid, name, friendly);
     return user;
 }
-
+function callListen(bot, message){
+    console.log('working');
+    if(callback !== undefined)
+        callback(bot,message);
+}
 function updateUser(user){
     database.updateUser(user.id, user.name, user.friendly);
 }
+function listen(toCallback){
+    callback = toCallback;
+}
+module.exports.listen = listen;
