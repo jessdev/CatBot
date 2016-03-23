@@ -51,7 +51,6 @@ function addUser(id, name, friendly){
 
 function addMessage(userid, message) {
     readUser(userid, function(user) {
-        console.log(user);
         if (user != null) {
             db.serialize(function() {
                 var stmt = db.prepare("INSERT INTO tblMessage VALUES (?, ?)");
