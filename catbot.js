@@ -1,8 +1,27 @@
 var Botkit = require("botkit");
-var database = require('datamodule');
+var database = require('./datatable.js');
+
 
 var controller = Botkit.slackbot({
     debug: true,
+});
+
+database.getAllUsers(function(users) {
+    for (var i = 0; i < users.length; i++) {
+        controller.storage.users.get(users[i].USERID, function(err, user) {
+            if (!user) {
+                user = {
+                    id: users[i].USERID,
+                    name: users[i].NAME,
+                    friendly: (users[i].FRIENDLY==1? true : false)
+                };
+            }
+            controller.storage.users.save(user,function(err, id) {
+                console.log(user);
+            });
+        });
+    }
+    console.log(users);
 });
 
 var feeling = {
@@ -20,6 +39,10 @@ var bot = controller.spawn({
 
 controller.hears(['hello','hi', 'hey'],'direct_message,direct_mention,mention',function(bot, message) {
     controller.storage.users.get(message.user,function(err, user) {
+        if(!user){
+            user = userinit(message.user, '?', false);
+        }
+        console.log(user);
         if (user && user.friendly) {
             theBotHeardThat(bot, message, feeling.happy);
             bot.reply(message,'meow..?');
@@ -35,9 +58,10 @@ controller.hears(['good cat', 'good kitty', 'good catbot'], ['ambient'], functio
     
     controller.storage.users.get(message.user, function(err, user){
         if (!user) {
-            user = {
-                id: message.user,
-            };
+            user = userinit(message.user, "?", true);
+        }else if(!user.friendly){
+            user.friendly = true;
+            updateUser(user);
         }
         user.friendly = true;
         controller.storage.users.save(user,function(err, id) {
@@ -50,37 +74,45 @@ controller.hears(['bad cat', 'bad kitty', 'bad catbot'], ['ambient'], function(b
     
     controller.storage.users.get(message.user, function(err, user){
         if (!user) {
-            user = {
-                id: message.user
-            };
+            user = userinit(message.user, "?", false);
+        }else if(user.friendly){
+            user.friendly = false;
+            updateUser(user);
         }
-        user.friendly = false;
         controller.storage.users.save(user,function(err, id) {
             bot.reply(message,'Hisssss');
         });
     });
 });
 
-controller.hears(['call me (.*)'],['ambient'],function(bot, message) {
+controller.hears(['call me (.*)'],['ambient','direct_message','direct_mention','mention'],function(bot, message) {
     var matches = message.text.match(/call me (.*)/i);
     var name = matches[1];
     theBotHeardThat(bot, message, feeling.cat);
     controller.storage.users.get(message.user,function(err, user) {
-        if (!user) {
-            user = {
-                id: message.user
-            };
+        if(!user){
+            user = userinit(message.user, name, false);
+        }else{
+            user.name = name;
+            updateUser(user);
         }
-        user.name = name;
-        database.addUser(user.id, user.name, (user.friendly != undefined ? user.friendly : false));
         controller.storage.users.save(user,function(err, id) {
             //bot.reply(message,'Nya~');
         });
     });
 });
 
-controller.hears(['report'], 'direct_message,direct_mention,mention', function(bot, message){
-    
+controller.hears(['report'], ['direct_message','direct_mention','mention'], function(bot, message){
+    controller.storage.users.get(message.user,function(err, user) {
+        if(user && user.name == 'jdev'){
+            database.getAllUsers(function(users) {
+                for (var i = 0; i < users.length; i++) {
+                    bot.reply(message, users[i].USERID + " "+users[i].NAME + " "+users[i].FRIENDLY);
+                }
+            });
+        }
+        bot.reply(message, 'Nya~~~~~');
+    });
 });
 
 controller.hears(['uptime','identify yourself','who are you','what is your name'],'direct_message,direct_mention,mention',function(bot, message) {
@@ -119,4 +151,19 @@ function theBotHeardThat(bot, message, emoji){
             bot.botkit.log('Failed to add emoji reaction :(',err);
         }
     });
+}
+
+function userinit(userid, name, friendly){
+    user = {
+        id: userid,
+        name: name,
+        friendly: friendly 
+    };
+    console.log(user);
+    database.addUser(userid, name, friendly);
+    return user;
+}
+
+function updateUser(user){
+    database.updateUser(user.id, user.name, user.friendly);
 }
