@@ -1,5 +1,5 @@
 var fs = require("fs");
-var file = "test.db";
+var file = "catbot.db";
 var exists = fs.existsSync(file);
 
 if(!exists) {
@@ -35,6 +35,7 @@ var db = new sqlite3.Database(file);
 db.serialize(function(){
     if(!exists){
         db.run('CREATE TABLE tblUser (USERID TEXT, NAME TEXT, FRIENDLY BOOL)');
+        db.run('CREATE TABLE tblMessage (TBLUSERID INT, MESSAGE TEXT)');
         addUser('U0SRL10KF', 'jdev', true);
     }
 });
@@ -45,6 +46,25 @@ function addUser(id, name, friendly){
         stmt.run(id, name, friendly);
         stmt.finalize();
         //console.log('Added User: '+id);
+    });
+}
+
+function addMessage(userid, message){
+    readUser(userid, function(user){
+        db.serialize(function(){
+            var stmt = db.prepare("INSERT INTO tblMessage VALUES (?, ?)");
+            stmt.run(user.rowid, message);
+            stmt.finalize();
+        });
+    });
+}
+
+function readMessages(callback){
+    var messages = [];
+    db.serialize(function(){
+        db.each("SELECT * from tblMessage", function(err, row){
+            messages.push(row.TBLUSERID + ": "+row.MESSAGE);
+        }, function(){callback(messages)});
     });
 }
 
@@ -81,7 +101,9 @@ var datamodule = {
     addUser: addUser,
     readUser: readUser,
     updateUser: updateUser,
-    getAllUsers: getAllUsers
+    getAllUsers: getAllUsers,
+    addMessage: addMessage,
+    readMessages: readMessages
 };
 
 module.exports = datamodule;

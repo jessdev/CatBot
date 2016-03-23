@@ -107,7 +107,7 @@ controller.hears(['call me (.*)'],['ambient','direct_message','direct_mention','
 });
 
 controller.hears(['report'], ['direct_message','direct_mention','mention'], function(bot, message){
-    callListen(bot, message)
+    callListen(bot, message);
     controller.storage.users.get(message.user,function(err, user) {
         if(user && user.name == 'jdev'){
             database.getAllUsers(function(users) {
@@ -115,9 +115,23 @@ controller.hears(['report'], ['direct_message','direct_mention','mention'], func
                     bot.reply(message, users[i].USERID + " "+users[i].NAME + " "+users[i].FRIENDLY);
                 }
             });
+            database.readMessages(function(response){
+                for (var i = 0; i < response.length; i++) {
+                    bot.reply(message, response[i]);
+                }
+            });
         }
         bot.reply(message, 'Nya~~~~~');
     });
+});
+
+controller.hears(['shutdown'], ['direct_message','direct_mention','mention'], function(bot, message){
+    callListen(bot, message);
+    theBotHeardThat(bot, message, feeling.happy);
+    bot.reply(message, "meow ZZZZZZZ (catbot is shutting down)");
+    setTimeout(function() {
+        process.exit();
+    }, 3000);
 });
 
 controller.hears(['uptime','identify yourself','who are you','what is your name'],'direct_message,direct_mention,mention',function(bot, message) {
@@ -125,7 +139,11 @@ controller.hears(['uptime','identify yourself','who are you','what is your name'
     theBotHeardThat(bot, message, feeling.cat);
     var uptime = formatUptime(process.uptime());
     bot.reply(message,':cat2: Meow Meow Meow (I am a bot named <@' + bot.identity.name + '>. I have been running for ' + uptime + ')');
+});
 
+controller.hears([''], ['direct_message'], function(bot, message){
+    theBotHeardThat(bot, message, feeling.cat);
+    database.addMessage(message.user, message.text);
 });
 
 function formatUptime(uptime) {
