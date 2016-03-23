@@ -21,7 +21,6 @@ database.getAllUsers(function(users) {
             });
         });
     }
-    //console.log(users);
 });
 
 var feeling = {
@@ -141,7 +140,7 @@ controller.hears(['uptime','identify yourself','who are you','what is your name'
     bot.reply(message,':cat2: Meow Meow Meow (I am a bot named <@' + bot.identity.name + '>. I have been running for ' + uptime + ')');
 });
 
-controller.hears([''], ['direct_message'], function(bot, message){
+controller.hears([''], ['direct_message','direct_mention','mention'], function(bot, message){
     theBotHeardThat(bot, message, feeling.cat);
     database.addMessage(message.user, message.text);
 });
@@ -183,7 +182,6 @@ function userinit(userid, name, friendly){
         name: name,
         friendly: friendly 
     };
-    //console.log(user);
     database.addUser(userid, name, friendly);
     return user;
 }

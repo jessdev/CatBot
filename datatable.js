@@ -49,13 +49,16 @@ function addUser(id, name, friendly){
     });
 }
 
-function addMessage(userid, message){
-    readUser(userid, function(user){
-        db.serialize(function(){
-            var stmt = db.prepare("INSERT INTO tblMessage VALUES (?, ?)");
-            stmt.run(user.rowid, message);
-            stmt.finalize();
-        });
+function addMessage(userid, message) {
+    readUser(userid, function(user) {
+        console.log(user);
+        if (user != null) {
+            db.serialize(function() {
+                var stmt = db.prepare("INSERT INTO tblMessage VALUES (?, ?)");
+                stmt.run(user[0].USERID, message);
+                stmt.finalize();
+            });
+        }
     });
 }
 
