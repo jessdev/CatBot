@@ -35,26 +35,53 @@ var db = new sqlite3.Database(file);
 db.serialize(function(){
     if(!exists){
         db.run('CREATE TABLE tblUser (USERID TEXT, NAME TEXT, FRIENDLY BOOL)');
+        addUser('U0SRL10KF', 'jdev', true);
     }
 });
 
 function addUser(id, name, friendly){
     db.serialize(function(){
-        //var stmt = db.prepare("INSERT INTO tblUser VALUES (?)");
-        var query = "INSERT INTO Customers (USERID, NAME, FRIENDLY) VALUES ('"+id+"', '"+name+"', "+friendly+")";
-        db.run(query);
+        var stmt = db.prepare("INSERT INTO tblUser VALUES (?, ?, ?)");
+        stmt.run(id, name, friendly);
+        stmt.finalize();
+        console.log('Added User: '+id);
     });
 }
 
-function readUser(id){
-    return db.serialize(function(){
-        return db.run("SELECT * FROM tblUser WHERE USERID="+"'"+id+"'");
+function readUser(id, callback){
+    var query = 'SELECT * FROM tblUser WHERE USERID="'+id+'"';
+    db.serialize(function(){
+        db.all(query, function(err, rows){
+            callback(rows);
+        });
+    });
+}
+
+function updateUser(id, name, friendly){
+    var query = 'UPDATE tblUser SET NAME="'+name+'", FRIENDLY='+(friendly? 1: 0)+' where USERID="'+id+'"' ;
+    console.log(query);
+    db.serialize(function(){
+        db.run(query);
+        console.log('Update complete');
+    });
+}
+
+function getAllUsers(callback){
+    var users = [];
+    db.serialize(function(){
+        db.each("SELECT * from tblUser", function(err, row){
+            users.push(row);
+        }, function(err, idk){
+            callback(users);
+        });
     });
 }
 
 var datamodule = {
     addUser: addUser,
-    readUser: readUser
+    readUser: readUser,
+    updateUser: updateUser,
+    getAllUsers: getAllUsers
 };
 
 module.exports = datamodule;
