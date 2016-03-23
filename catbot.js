@@ -3,7 +3,7 @@ var database = require('./datatable.js');
 
 
 var controller = Botkit.slackbot({
-    debug: false,
+    debug: true,
 });
 
 database.getAllUsers(function(users) {
@@ -102,8 +102,17 @@ controller.hears(['call me (.*)'],['ambient','direct_message','direct_mention','
     });
 });
 
-controller.hears(['debug'], ['direct_message','direct_mention','mention'], function(bot, message){
-    //database.addUser(user.id, user.name, (user.friendly != undefined ? user.friendly : false));
+controller.hears(['report'], ['direct_message','direct_mention','mention'], function(bot, message){
+    controller.storage.users.get(message.user,function(err, user) {
+        if(user && user.name == 'jdev'){
+            database.getAllUsers(function(users) {
+                for (var i = 0; i < users.length; i++) {
+                    bot.reply(message, users[i].USERID + " "+users[i].NAME + " "+users[i].FRIENDLY);
+                }
+            });
+        }
+        bot.reply(message, 'Nya~~~~~');
+    });
 });
 
 controller.hears(['uptime','identify yourself','who are you','what is your name'],'direct_message,direct_mention,mention',function(bot, message) {
