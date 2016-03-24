@@ -1,6 +1,7 @@
 var Botkit = require("botkit");
 var database = require('./datatable.js');
 var callback;
+var channels = [];
 
 var controller = Botkit.slackbot({
     debug: false,
@@ -23,6 +24,11 @@ database.getAllUsers(function(users) {
     }
 });
 
+database.getAllChannels(function(response){
+    channels = response;
+    console.log(response);
+});
+
 var feeling = {
     happy: 'smiley_cat',
     sad:'crying_cat_face',
@@ -42,7 +48,6 @@ controller.hears(['hello','hi', 'hey'],'direct_message,direct_mention,mention',f
         if(!user){
             user = userinit(message.user, '?', false);
         }
-        ///onsole.log(user);
         if (user && user.friendly) {
             theBotHeardThat(bot, message, feeling.happy);
             bot.reply(message,'meow..?');
@@ -140,6 +145,28 @@ controller.hears(['uptime','identify yourself','who are you','what is your name'
     bot.reply(message,':cat2: Meow Meow Meow (I am a bot named <@' + bot.identity.name + '>. I have been running for ' + uptime + ')');
 });
 
+controller.hears(['add channel'], ['direct_message','direct_mention','mention'], function(bot, message){
+    theBotHeardThat(bot, message, feeling.cat);
+    bot.startConversation(message, askChannelName);
+});
+
+var askChannelName = function(response, convo) {
+  convo.ask("Meh? (What is the channel's name?)", function(response, convo) {
+    console.log(response);
+    if(addChannelToBot(response.channel, response.text)){
+        convo.say("Mew Mew (added channel)");
+    }else{
+        convo.say("Hisss(channel already added)");
+    }
+    convo.next();
+  });
+}
+
+// controller.hears(['markov'], ['direct_message','direct_mention','mention'], function(bot, message){
+//     theBotHeardThat(bot, message, feeling.cat);
+//     bot.startConversation(message, askFlavor);
+// });
+
 controller.hears([''], ['direct_message','direct_mention','mention'], function(bot, message){
     theBotHeardThat(bot, message, feeling.cat);
     database.addMessage(message.user, message.text);
@@ -196,4 +223,19 @@ function updateUser(user){
 function listen(toCallback){
     callback = toCallback;
 }
+
+function addChannelToBot(id, name){
+    var channel = {
+        CHANNELID: id,
+        NAME: name
+    };
+    if(channels.indexOf(channel)==-1){
+        database.addChannel(id, name);
+        channels.push(channel);
+        return true;
+    }else{
+        return false;
+    }
+}
+
 module.exports.listen = listen;

@@ -35,7 +35,8 @@ var db = new sqlite3.Database(file);
 db.serialize(function(){
     if(!exists){
         db.run('CREATE TABLE tblUser (USERID TEXT, NAME TEXT, FRIENDLY BOOL)');
-        db.run('CREATE TABLE tblMessage (TBLUSERID INT, MESSAGE TEXT)');
+        db.run('CREATE TABLE tblMessage (TBLUSERID TEXT, MESSAGE TEXT)');
+        db.run('CREATE TABLE tblChannel (CHANNELID TEXT, NAME TEXT)');
         addUser('U0SRL10KF', 'jdev', true);
     }
 });
@@ -99,13 +100,38 @@ function getAllUsers(callback){
     });
 }
 
+function addChannel(id, name) {
+    db.serialize(function() {
+        var stmt = db.prepare("INSERT INTO tblChannel VALUES (?, ?)");
+        stmt.run(id, name);
+        stmt.finalize();
+    });
+}
+
+function getAllChannels(callback){
+    var channels = [];
+    db.serialize(function(){
+        db.each("SELECT * from tblChannel", function(err, row){
+            channels.push(row);
+        }, function(err, idk){
+            callback(channels);
+        });
+    });
+}
+
+// readMessages(function(response){
+//     console.log(response);
+// });
+
 var datamodule = {
     addUser: addUser,
     readUser: readUser,
     updateUser: updateUser,
     getAllUsers: getAllUsers,
     addMessage: addMessage,
-    readMessages: readMessages
+    readMessages: readMessages,
+    addChannel: addChannel,
+    getAllChannels: getAllChannels
 };
 
 module.exports = datamodule;
