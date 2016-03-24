@@ -139,14 +139,31 @@ controller.hears(['shutdown'], ['direct_message','direct_mention','mention'], fu
 });
 
 controller.hears(['uptime','identify yourself','who are you','what is your name'],'direct_message,direct_mention,mention',function(bot, message) {
-    callListen(bot, message)
+    callListen(bot, message);
+    controller.storage.users.get(message.user,function(err, user) {
+        if(!user){
+            user = userinit(message.user, '?', false);
+        }
+        controller.storage.users.save(user,function(err, id) {
+            //bot.reply(message,'Nya~');
+        });
+    });
     theBotHeardThat(bot, message, feeling.cat);
     var uptime = formatUptime(process.uptime());
     bot.reply(message,':cat2: Meow Meow Meow (I am a bot named <@' + bot.identity.name + '>. I have been running for ' + uptime + ')');
 });
 
 controller.hears(['add channel'], ['direct_message','direct_mention','mention'], function(bot, message){
+    
     theBotHeardThat(bot, message, feeling.cat);
+    controller.storage.users.get(message.user,function(err, user) {
+        if(!user){
+            user = userinit(message.user, '?', false);
+        }
+        controller.storage.users.save(user,function(err, id) {
+            //bot.reply(message,'Nya~');
+        });
+    });
     bot.startConversation(message, askChannelName);
 });
 
@@ -169,7 +186,27 @@ var askChannelName = function(response, convo) {
 
 controller.hears([''], ['direct_message','direct_mention','mention'], function(bot, message){
     theBotHeardThat(bot, message, feeling.cat);
-    database.addMessage(message.user, message.text);
+    controller.storage.users.get(message.user,function(err, user) {
+        if(!user){
+            user = userinit(message.user, '?', false);
+        }
+        controller.storage.users.save(user,function(err, id) {
+            database.addMessage(message.user, message.text);
+        });
+    });
+    
+});
+
+controller.hears(['cat'], ['direct_message','direct_mention','mention', 'ambient'], function(bot, message){
+    theBotHeardThat(bot, message, feeling.cat);
+    controller.storage.users.get(message.user,function(err, user) {
+        if(!user){
+            user = userinit(message.user, '?', false);
+        }
+        controller.storage.users.save(user,function(err, id) {
+            database.addMessage(message.user, message.text);
+        });
+    });
 });
 
 function formatUptime(uptime) {
