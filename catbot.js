@@ -39,7 +39,7 @@ var feeling = {
 };
 
 var bot = controller.spawn({
-    token: 'xoxb-26876200608-6bw3bhhrdlBzelTms47UrpaE'
+    token: 'put token here'
 }).startRTM();
 
 controller.hears(['hello','hi', 'hey'],'direct_message,direct_mention,mention',function(bot, message) {
